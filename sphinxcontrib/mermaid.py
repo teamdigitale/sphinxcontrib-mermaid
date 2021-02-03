@@ -32,6 +32,8 @@ from sphinx.util import logging
 from .exceptions import MermaidError
 from .autoclassdiag import class_diagram
 
+ALLOWED_FORMATS = ('png', 'svg', 'jpg', 'raw')
+
 logger = logging.getLogger(__name__)
 
 mapname_re = re.compile(r'<map id="(.*?)"')
@@ -237,9 +239,9 @@ def render_mm_html(self, node, code, options, prefix='mermaid',
                    imgcls=None, alt=None)
 
     try:
-        if _fmt not in ('png', 'svg'):
-            raise MermaidError("mermaid_output_format must be one of 'raw', 'png', "
-                                "'svg', but is %r" % _fmt)
+        if _fmt not in ALLOWED_FORMATS:
+            raise MermaidError("mermaid_output_format must be one of %r "
+                                ", but is %r" % (ALLOWED_FORMATS, _fmt))
 
         fname, outfn = render_mm(self, code, options, _fmt, prefix)
     except MermaidError as exc:
@@ -274,13 +276,13 @@ def html_visit_mermaid(self, node):
 
 
 def render_mm_latex(self, node, code, options, prefix='mermaid'):
-    _fmt = self.builder.config.mermaid_output_format
+    _fmt = self.builder.config.mermaid_output_format_latex
     if _fmt == 'raw':
         _fmt = 'pdf'
     try:
-        if _fmt not in ('png', 'svg', 'jpg', 'pdf'):
-            raise MermaidError("mermaid_output_format must be one of 'raw', 'png', "
-                                "'svg', 'jpg' but is %r" % _fmt)
+        if _fmt not in ALLOWED_FORMATS:
+            raise MermaidError("mermaid_output_format_latex must be one of %r "
+                                " but is %r" % (ALLOWED_FORMATS, _fmt))
         fname, outfn = render_mm(self, code, options, _fmt, prefix)
     except MermaidError as exc:
         logger.warning('mm code %r: ' % code + str(exc))
@@ -382,6 +384,7 @@ def setup(app):
     app.add_config_value('mermaid_cmd_shell', 'False', 'html')
     app.add_config_value('mermaid_pdfcrop', '', 'html')
     app.add_config_value('mermaid_output_format', 'raw', 'html')
+    app.add_config_value('mermaid_output_format_latex', 'pdf', 'html')
     app.add_config_value('mermaid_params', list(), 'html')
     app.add_config_value('mermaid_verbose', False, 'html')
     app.add_config_value('mermaid_sequence_config', False, 'html')
